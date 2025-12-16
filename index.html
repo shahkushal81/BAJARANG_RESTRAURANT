@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajrang Restaurant | Authentic Gujarati & Kathiyavadi Food</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        saffron: '#FF9933',
+                        earth: '#5D4037',
+                        cream: '#FFFDD0',
+                        fresh: '#4CAF50',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FFFDD0; }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion } = window.Motion; // Access Framer Motion global
+
+        // --- Icons (SVG Components for reliability) ---
+        const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>;
+        const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>;
+        const StarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#FF9933" stroke="#FF9933" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
+        const WalletIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF9933" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>;
+        const ZapIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF9933" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
+        const HeartIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF9933" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>;
+        const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF9933" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+        const MapPinIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+        const PhoneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+
+        // --- Navbar Component ---
+        const Navbar = () => {
+            const [isOpen, setIsOpen] = useState(false);
+
+            return (
+                <nav className="sticky top-0 z-50 bg-cream/90 backdrop-blur-md border-b border-orange-200 shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-16 items-center">
+                            <div className="flex-shrink-0 flex items-center">
+                                <span className="font-bold text-2xl text-saffron tracking-tight">Bajrang &nbsp;<span className="text-earth">Restaurant</span></span>
+                            </div>
+                            
+                            {/* Desktop Menu */}
+                            <div className="hidden md:flex space-x-8 items-center">
+                                <a href="#home" className="text-earth hover:text-saffron transition font-medium">Home</a>
+                                <a href="#features" className="text-earth hover:text-saffron transition font-medium">Why Us</a>
+                                <a href="#reviews" className="text-earth hover:text-saffron transition font-medium">Reviews</a>
+                                <a href="#contact" className="text-earth hover:text-saffron transition font-medium">Contact</a>
+                                <a href="tel:06355005278" className="bg-saffron text-white px-5 py-2 rounded-full font-bold hover:bg-orange-600 transition shadow-lg transform hover:-translate-y-0.5">
+                                    Call to Order
+                                </a>
+                            </div>
+
+                            {/* Mobile Menu Button */}
+                            <div className="md:hidden">
+                                <button onClick={() => setIsOpen(!isOpen)} className="text-earth p-2">
+                                    {isOpen ? <XIcon /> : <MenuIcon />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu Dropdown */}
+                    {isOpen && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="md:hidden bg-cream border-t border-orange-200 absolute w-full shadow-xl"
+                        >
+                            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                                <a href="#home" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-earth hover:bg-orange-100 rounded-md">Home</a>
+                                <a href="#features" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-earth hover:bg-orange-100 rounded-md">Why Us</a>
+                                <a href="#reviews" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-earth hover:bg-orange-100 rounded-md">Reviews</a>
+                                <a href="#contact" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-earth hover:bg-orange-100 rounded-md">Contact</a>
+                                <a href="tel:06355005278" className="block w-full text-center mt-4 bg-saffron text-white px-5 py-3 rounded-lg font-bold">
+                                    Call Now
+                                </a>
+                            </div>
+                        </motion.div>
+                    )}
+                </nav>
+            );
+        };
+
+        // --- Hero Component ---
+        const Hero = () => {
+            return (
+                <section id="home" className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+                    {/* Background Image with Overlay */}
+                    <div className="absolute inset-0 z-0">
+                        <img 
+                            // Placeholder for a high-quality Gujarati Thali image
+                            src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=2000&auto=format&fit=crop" 
+                            alt="Authentic Indian Food" 
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/60"></div>
+                    </div>
+
+                    <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                        >
+                            <span className="inline-block py-1 px-3 rounded-full bg-saffron/20 text-saffron font-bold text-sm mb-4 border border-saffron">
+                                VADODARA'S HIDDEN GEM
+                            </span>
+                            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                                Authentic <span className="text-saffron">Kathiyavadi</span> & Gujarati Taste
+                            </h1>
+                            <p className="text-gray-200 text-lg md:text-xl mb-8 max-w-2xl mx-auto">
+                                Home-style cooking, economical prices (₹1–200), and the quickest service in town. The favorite spot for students and families on Waghodiya Road.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <a href="#menu" className="bg-saffron text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-orange-600 transition shadow-lg">
+                                    Our Specialties
+                                </a>
+                                <a href="#contact" className="bg-white/10 backdrop-blur-sm text-white border border-white/30 px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-earth transition">
+                                    Get Directions
+                                </a>
+                            </div>
+                        </motion.div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Features Component ---
+        const Features = () => {
+            const features = [
+                { icon: <WalletIcon />, title: "Pocket Friendly", desc: "Full wholesome meals ranging from ₹100 – ₹200. Perfect for students." },
+                { icon: <ZapIcon />, title: "Lightning Service", desc: "We respect your time. Get served quickly without compromising quality." },
+                { icon: <HeartIcon />, title: "Pure Taste", desc: "Authentic spices and high-quality ingredients, just like home cooking." },
+                { icon: <UsersIcon />, title: "Everyone Welcome", desc: "A safe, inclusive space for students, travelers, and families." }
+            ];
+
+            return (
+                <section id="features" className="py-20 bg-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl font-bold text-earth mb-4">Why Choose Bajrang?</h2>
+                            <div className="h-1 w-20 bg-saffron mx-auto"></div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {features.map((feature, index) => (
+                                <motion.div 
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    viewport={{ once: true }}
+                                    className="p-6 bg-cream rounded-xl text-center hover:shadow-lg transition border border-orange-100"
+                                >
+                                    <div className="flex justify-center mb-4">{feature.icon}</div>
+                                    <h3 className="text-xl font-bold text-earth mb-2">{feature.title}</h3>
+                                    <p className="text-gray-600">{feature.desc}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Reviews Component ---
+        const Reviews = () => {
+            const reviews = [
+                { name: "Akshay Vyas", text: "Best place for Kathiyavadi food, great customer service. Perfect location for Gujarati food with quality and economical price.", stars: 5 },
+                { name: "Maitri Maheshwari", text: "Amazing taste and quick service! Loved it.", stars: 5 },
+                { name: "Dipti Padaliya", text: "Food quality is very best and service also is awesome.", stars: 5 },
+                { name: "Google Summary", text: "Ranked 5.0 Stars with 19+ Reviews.", stars: 5, highlight: true }
+            ];
+
+            return (
+                <section id="reviews" className="py-20 bg-cream">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl font-bold text-earth mb-4">Word on the Street</h2>
+                            <p className="text-gray-600">See what our customers are saying on Google Maps</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {reviews.map((review, index) => (
+                                <motion.div 
+                                    key={index}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    className={`p-8 rounded-xl shadow-sm border ${review.highlight ? 'bg-saffron text-white border-saffron' : 'bg-white border-orange-100'}`}
+                                >
+                                    <div className="flex mb-4">
+                                        {[...Array(review.stars)].map((_, i) => (
+                                            <div key={i} className={review.highlight ? 'text-white' : ''}><StarIcon /></div>
+                                        ))}
+                                    </div>
+                                    <p className={`mb-6 italic ${review.highlight ? 'text-white' : 'text-gray-600'}`}>"{review.text}"</p>
+                                    <div className="font-bold flex items-center">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${review.highlight ? 'bg-white text-saffron' : 'bg-orange-100 text-saffron'}`}>
+                                            {review.name[0]}
+                                        </div>
+                                        {review.name}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Menu Preview ---
+        const Menu = () => {
+            return (
+                <section id="menu" className="py-20 bg-white">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-earth text-center mb-12">Our Specialties</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {[
+                                { 
+                                    title: "Gujarati Thali", 
+                                    // Image of a Gujarati Thali
+                                    img: "https://images.unsplash.com/photo-1552590635-27c2c2128abf?auto=format&fit=crop&w=600&q=80" 
+                                },
+                                { 
+                                    title: "Kathiyavadi Special", 
+                                    // Image of Kathiyavadi style curries
+                                    img: "https://plus.unsplash.com/premium_photo-1723708882892-de33ff578c11?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                                },
+                                { 
+                                    title: "Punjabi", 
+                                    // Image representing Indian Chinese food (Noodles/Stir-fry)
+                                    img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                                }
+                            ].map((item, index) => (
+                                <div key={index} className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer">
+                                    <div className="aspect-w-16 aspect-h-9 h-64">
+                                        <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                                        <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Footer ---
+        const Footer = () => {
+            return (
+                <footer id="contact" className="bg-earth text-cream py-16">
+                    <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <h3 className="text-3xl font-bold text-saffron mb-6">Bajrang Restaurant</h3>
+                            <p className="mb-6 opacity-80 max-w-sm">Serving authentic smiles and spices to Vadodara students and families.</p>
+                            
+                            <div className="space-y-4">
+                                <div className="flex items-start">
+                                    <div className="mt-1 mr-3 text-saffron"><MapPinIcon /></div>
+                                    <p className="opacity-90">
+                                        Aava County Arcade, 10, Waghodiya Road, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+                                        nr. Hostel Shivay, opp. Sumandeep Vidhyapith,<br/>
+                                        Vadodara, Gujarat 391760<br/><br/>
+                                        
+                                        <a href="https://www.google.com/maps/place/Bajrang+Restaurant/@22.2981802,73.2272616,14z/data=!3m1!5s0x395fc56690d4d24f:0x6bf42c74c63df973!4m6!3m5!1s0x395fc56690bec60f:0xad876222c44501b7!8m2!3d22.2981802!4d73.247861!16s%2Fg%2F11b6gg27mc?coh=277535&entry=tts&g_ep=EgoyMDI1MTIwOS4wIPu8ASoKLDEwMDc5MjA3M0gBUAM%3D">GO TO GOOGLE MAPS</a>
+                                    </p>
+                            </div>
+
+                                <div className="flex items-center">
+                                    <div className="mr-3 text-saffron"><PhoneIcon /></div>
+                                    <a href="tel:06355005278" className="hover:text-saffron transition font-bold text-lg">06355 005 278</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Map Placeholder - The iframe link is intentionally simple since map embeds can be complex without a proper key */}
+                        <div className="h-64 bg-gray-200 rounded-lg overflow-hidden">
+                            <iframe 
+                                src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=Bajrang%20Restaurant%20Vadodara+(Bajrang%20Restaurant)&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" 
+                                width="100%" 
+                                height="100%" 
+                                style={{ border: 0 }} 
+                                allowFullScreen="" 
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+                    <div className="text-center mt-12 pt-8 border-t border-white/10 opacity-60 text-sm">
+                        <p>© 2024 Bajrang Restaurant. Built by [Your Name/Agency].</p>
+                    </div>
+                </footer>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            return (
+                <div className="font-sans text-gray-800">
+                    <Navbar />
+                    <Hero />
+                    <Features />
+                    <Reviews />
+                    <Menu />
+                    <Footer />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
